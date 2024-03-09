@@ -24,4 +24,4 @@ def see_previous():
 # @app.get("/<path:path>")
 # def send_file(path):
 #     return send_file(path)
-app.run(debug=True)
+app.run(debug=True,host="0.0.0.0")

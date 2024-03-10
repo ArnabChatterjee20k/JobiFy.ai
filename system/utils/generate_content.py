@@ -48,7 +48,7 @@ def content_handler(task_id=None,task=None,*args,**kwargs):
     task = AsyncResult(task_id)
     try:
         with current_app.app_context():
-            task = Task(task_id=task_id,link=kwargs.get("kwargs").get("link"))
+            task = Task(task_id=task_id,name=kwargs.get("kwargs").get("company_name"),link=kwargs.get("kwargs").get("link"))
             db.session.add(task)
             db.session.commit()
     except Exception as e:

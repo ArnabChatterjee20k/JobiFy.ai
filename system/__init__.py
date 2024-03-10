@@ -6,7 +6,7 @@ from celery import Celery, Task , current_app
 from celery.result import AsyncResult
 from flask_sqlalchemy import SQLAlchemy
 from system.db import db
-
+from system.utils.get_tasks import get_task
 load_dotenv(".env")
 
 def celery_init_app(app: Flask) -> Celery:
@@ -51,7 +51,8 @@ def create_app():
     # routes
     @app.get("/")
     def main():
-        return render_template("index.html")
+        tasks = get_task()
+        return render_template("index.html",tasks=tasks)
 
     @app.post("/generate")
     def generate():
@@ -60,8 +61,7 @@ def create_app():
         with app.app_context():
             task_id = generate_content.delay(company_name=company_name,link=url)
             print(task_id)
-
-        return redirect(url_for("static",filename=f"{company_name}.txt"))
+        return redirect(url_for("main"))
 
     @app.get("/previous")
     def see_previous():

@@ -2,8 +2,11 @@ from flask import Flask,render_template,request,redirect,url_for
 from system.utils.generate_content import get_files , generate_content
 from system.utils.create_queue import create_queue
 from dotenv import load_dotenv
-from celery import Celery, Task
+from celery import Celery, Task , current_app
 from celery.result import AsyncResult
+from flask_sqlalchemy import SQLAlchemy
+from system.db import db
+
 load_dotenv(".env")
 
 def celery_init_app(app: Flask) -> Celery:
@@ -21,13 +24,13 @@ def celery_init_app(app: Flask) -> Celery:
     return celery_app
 
 
-
 def create_app():
-    # tasks cache
-    tasks = {}
-
-
     app = Flask(__name__,template_folder="./views",static_folder="./contents")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///task.sqlite"
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
+
     CELERY_BROKER_BACKEND = "sqla+sqlite:///celery.sqlite"
     CELERY_CACHE_BACKEND = "db+sqlite:///celery.sqlite"
     CELERY_RESULT_BACKEND = "db+sqlite:///celery.sqlite"
@@ -44,7 +47,7 @@ def create_app():
 )
     app.config.from_prefixed_env()
     celery_init_app(app)
-
+    app.app_context().push() # pushing context so that celery workers can use it
     # routes
     @app.get("/")
     def main():
@@ -54,14 +57,17 @@ def create_app():
     def generate():
         url = request.form.get("url")    
         company_name = request.form.get("company_name")    
-
-        task_id = generate_content.delay(company_name=company_name,link=url)
-        print(task_id)
+        with app.app_context():
+            task_id = generate_content.delay(company_name=company_name,link=url)
+            print(task_id)
 
         return redirect(url_for("static",filename=f"{company_name}.txt"))
 
     @app.get("/previous")
     def see_previous():
+        inspector = current_app.control.inspect()
+        print(inspector.active())
+        print(inspector.reserved())
         return render_template("previous.html",content=get_files())
 
     @app.get("/result/<id>")
@@ -71,6 +77,7 @@ def create_app():
             "id":result.task_id,
             "ready": result.ready(),
             "state":result.state,
+            "kwargs":result.kwargs,
             "successful": result.successful(),
             "value": result.result if result.ready() else None,
         }

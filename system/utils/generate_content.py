@@ -3,12 +3,14 @@ from langchain_core.prompts import PromptTemplate,FewShotPromptTemplate
 from langchain_google_genai import GoogleGenerativeAI
 import asyncio
 from playwright.sync_api import sync_playwright, Playwright
+# from celery_worker import celery_app
+from celery import shared_task
 def get_files():
     return os.listdir("./contents/")
 
 def create_file(company_name,content):
     try:
-        with open(f"contents/{company_name}.txt","w") as f:
+        with open(f"system/contents/{company_name}.txt","w") as f:
             f.write(content)
         return True
     except Exception as e:
@@ -30,8 +32,7 @@ def get_content_from_llm(company_name,html):
 
         llm = GoogleGenerativeAI(model="gemini-1.0-pro",google_api_key=os.environ.get("GOOGLE_API_KEY"))
         return llm.invoke(prompt)
-
-
+@shared_task(ignore_result=False)
 def generate_content(company_name,link):
     html = scrape(link)
     content = get_content_from_llm(company_name,html)

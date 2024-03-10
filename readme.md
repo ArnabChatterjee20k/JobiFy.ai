@@ -6,5 +6,10 @@ So I automated the project.
 ### Tech Stack
 Python , flask, langchain, gemini
 
+### Starting
+* activate local env
+* celery -A celery_worker.celery_app worker --loglevel INFO -P solo
+* python app.py
+
 ### Prequisite
 Familiar with python code

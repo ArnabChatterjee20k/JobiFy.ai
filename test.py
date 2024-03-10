@@ -1,4 +1,4 @@
-from generate_content import scrape
+from system.utils.generate_content import scrape
 
 with open("example_html.html","wb") as f:
     html = scrape("https://skillbee.com/")

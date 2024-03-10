@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        gap: 4rem;
+      }
+
+      form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      button[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #0056b3;
+      }
+
+      .progress-holder {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .task-card {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        flex: 1;
+      }
+
+      .task-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .task-name {
+        font-weight: bold;
+      }
+
+      .task-link a {
+        text-decoration: none;
+        color: #007bff; /* Link color */
+      }
+
+      .task-state {
+        color: #fff; /* Text color */
+        padding: 5px 10px;
+        border-radius: 20px; /* Pill shape */
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/generate" method="post">
+      <input name="url" type="text" placeholder="Enter the homepage url" />
+      <input
+        name="company_name"
+        type="text"
+        placeholder="Enter the company_name"
+      />
+      <button type="submit">Generate</button>
+    </form>
+    <div class="progress-holder">
+      {% for task in tasks %}
+      <div class="task-card" id="{{task.task_id}}">
+        <div class="task-details">
+          <span class="task-name">{{task.name}}</span>
+          <span class="task-link"><a href="{{ url_for('static',filename=task.name ) }}.txt">Docs</a></span>
+          <span class="task-link"><a href="{{task.link}}">Link</a></span>
+          <span
+            class="task-state"
+            style="background-color:{{'#28a745' if task.state else '#dc3545'}}"
+            >{{'Completed' if task.state else 'Pending'}}</span
+          >
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>

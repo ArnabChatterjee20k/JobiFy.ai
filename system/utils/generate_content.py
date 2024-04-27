@@ -13,8 +13,16 @@ from celery.signals import task_failure , task_success ,task_postrun , task_prer
 def get_files():
     return os.listdir("system/contents/")
 
+def create_directory_if_not_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Directory '{directory}' created successfully.")
+    else:
+        print(f"Directory '{directory}' already exists.")
+
 def create_file(company_name,content):
     try:
+        create_directory_if_not_exists("system/contents")
         with open(f"system/contents/{company_name}.txt","w") as f:
             f.write(content)
         return True
